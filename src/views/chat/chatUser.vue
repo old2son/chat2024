@@ -1,69 +1,86 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 
 const message = reactive({
 	data: [
 		{
+			id: 1,
 			type: 'other',
 			content: '你好，这里是chat界面。',
+			time: '2024-11-18 15:30'
 		},
 		{
+			id: 2,
 			type: 'me',
 			content: '看起来还不错哦！',
+			time: '2024-11-18 15:30'
 		},
 		{
+			id: 3,
 			type: 'other',
-			content: '要加点互动功能吗？',
-		},
+			content: '要加点互动功能吗？'
+		}
 	],
-})
+	inputContent: ''
+});
 
+let $chatCont = ref<HTMLElement | null>(null);
 
+const sendMessage = () => {
+	/* if (!message.inputContent) {
+		alert('请输入内容');
+		return;
+	} */
+
+	message.data.push({
+		id: Number((Math.random() * 10).toFixed(3)),
+		type: 'me',
+		content: message.inputContent
+	});
+
+	message.inputContent = '';
+
+	if ($chatCont.value) {
+		$chatCont.value.scrollTop = $chatCont.value.scrollHeight;
+	}
+};
+
+onMounted(() => {
+	if ($chatCont.value) {
+		$chatCont.value.scrollTop = $chatCont.value.scrollHeight;
+	}
+});
 </script>
 
 <template>
 	<div class="chat-container">
-		<!-- 顶部标题 -->
 		<div class="chat-header">chat</div>
 
-		<!-- 聊天内容区 -->
-		<div class="chat-content" id="chatContent">
-			<!-- 时间 -->
-			<div class="chat-time">2024-11-18 15:30</div>
+		<div class="chat-content" ref="$chatCont">
+			<template v-for="item in message.data" :key="item.id">
+				<div v-if="item?.time" class="chat-time">{{ item.time }}</div>
 
-			<!-- 对方消息 -->
-			<div class="chat-bubble other">
-				<img class="avatar" src="@/assets/images/robot.gif" alt="robot头像" />
-				
-				<div class="bubble">你好，这里是chat界面。</div>
-			</div>
-
-			<!-- 自己的消息 -->
-			<div class="chat-bubble me">
-				<div class="bubble">看起来还不错哦！</div>
-				<img class="avatar" src="@/assets/images/user.gif" alt="我的头像" />
-			</div>
-
-			<!-- 时间 -->
-			<div class="chat-time">2024-11-18 15:32</div>
-
-			<!-- 对方消息 -->
-			<div class="chat-bubble other">
-				<img class="avatar" src="@/assets/images/robot.gif" alt="robot头像" />
-				<div class="bubble">要加点互动功能吗？</div>
-			</div>
+				<div :class="['chat-bubble', item.type]">
+					<template v-if="item.type === 'other'">
+						<img class="avatar" src="@/assets/images/robot.gif" alt="robot头像" />
+						<div class="bubble">{{ item.content }}</div>
+					</template>
+					<template v-else>
+						<div class="bubble">{{ item.content }}</div>
+						<img class="avatar" src="@/assets/images/user.gif" alt="我的头像" />
+					</template>
+				</div>
+			</template>
 		</div>
 
-		<!-- 输入框 -->
 		<div class="chat-footer">
-			<input type="text" class="chat-input" id="chatInput" placeholder="请输入消息..." />
-			<button class="send-btn" id="sendBtn">发送</button>
+			<input type="text" class="chat-input" v-model="message.inputContent" placeholder="请输入消息..." />
+			<button class="send-btn" @click="sendMessage">发送</button>
 		</div>
 	</div>
 </template>
 
 <style scoped>
-/* 容器 */
 .chat-container {
 	display: flex;
 	flex-direction: column;
@@ -75,7 +92,6 @@ const message = reactive({
 	background-color: #fff;
 }
 
-/* 顶部标题 */
 .chat-header {
 	padding: 15px;
 	text-align: center;
@@ -85,25 +101,21 @@ const message = reactive({
 	background-color: #2bbc80;
 }
 
-/* 聊天内容区 */
 .chat-content {
 	display: flex;
 	flex-direction: column;
 	flex: 1;
-	gap: 10px;
+	gap: 20px;
 	padding: 15px;
 	overflow-y: auto;
 }
 
-/* 时间 */
 .chat-time {
-	margin: 10px 0;
 	text-align: center;
 	color: #999;
 	font-size: 12px;
 }
 
-/* 聊天气泡 */
 .chat-bubble {
 	display: flex;
 	align-items: flex-start;
@@ -120,7 +132,6 @@ const message = reactive({
 	justify-content: flex-end;
 }
 
-/* 头像 */
 .avatar {
 	width: 40px;
 	height: 40px;
@@ -129,7 +140,6 @@ const message = reactive({
 	object-fit: cover;
 }
 
-/* 气泡样式 */
 .chat-bubble .bubble {
 	max-width: 70%;
 	line-height: 1.5;
@@ -151,7 +161,6 @@ const message = reactive({
 	background-color: #2bbc80;
 }
 
-/* 输入框 */
 .chat-footer {
 	display: flex;
 	padding: 10px;

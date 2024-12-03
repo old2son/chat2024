@@ -11,8 +11,14 @@ const routes = [
 ];
 
 let $header = ref<HTMLElement | null>(null);
+
 let headerHeight = computed(() => {
 	return $header.value ? `${$header.value.offsetHeight}px` : 0;
+});
+
+let windowHeight = computed(() => {
+	const headerHeightValue = typeof headerHeight.value === 'string' ? headerHeight.value.replace('px', '') : 0;
+	return `${(window.innerHeight - Number(headerHeightValue)) * 0.9}px`;
 });
 </script>
 
@@ -23,7 +29,7 @@ let headerHeight = computed(() => {
 
 			<nav>
 				<!-- <RouterLink to="/chat">Go to chat</RouterLink>  -->
-				<ul>
+				<ul :style="{ marginTop: windowHeight ? '20px' : 0 }">
 					<template v-for="route in routes" :key="route.id">
 						<li>
 							<RouterLink :to="route.path">
@@ -34,7 +40,6 @@ let headerHeight = computed(() => {
 				</ul>
 			</nav>
 		</div>
-		
 	</appLayout>
 </template>
 
@@ -58,27 +63,29 @@ let headerHeight = computed(() => {
 
 .page-home nav {
 	height: 100%;
-	margin-top: 10px;
-	padding-top: v-bind('headerHeight');
-	overflow: hidden auto;
 }
 
 .page-home nav ul {
 	display: flex;
 	justify-content: center;
-	flex-direction: column;
 	align-items: center;
-	gap: 12px;
-	height: 100%;
-	
+	flex-wrap: wrap;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	right: 0;
+	gap: 20px;
+	max-height: v-bind('windowHeight');
+	overflow: hidden auto;
+	transform: translate(0, -50%);
 }
 
 .page-home nav li {
 	width: 50vw;
-	padding: 4px 8px;
-	line-height: 1.8;
+	padding: 12px;
 	border-radius: 4px;
 	text-align: center;
+	box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 	background-color: #2bbc80;
 }
 
